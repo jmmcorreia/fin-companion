@@ -1,27 +1,49 @@
-from sqlmodel import select, Session, delete
-from app.dbmodel.transaction import Transaction
-from typing import List
 import uuid
+from dataclasses import dataclass
+from typing import List, Protocol
 
-def get_user_transactions(user_uuid: uuid.UUID, session: Session) -> List[Transaction] | None:
-    transactions = session.exec(select(Transaction).where(Transaction.user_id == user_uuid)).all()
-    return list(transactions) # TODO: if the number of transactions is large, consider pagination
+from sqlmodel import Session, delete, select
 
-def get_user_transaction(user_uuid: uuid.UUID, transaction_id: uuid.UUID, session: Session) -> Transaction | None:
-    transaction = session.exec(select(Transaction).where(Transaction.user_id == user_uuid, Transaction.id == transaction_id)).first()
-    return transaction
-
-def insert_transaction(transaction: Transaction, session: Session) -> Transaction:
-    session.add(transaction)
-    session.commit()
-    session.refresh(transaction)
-    return transaction
+from app.dbmodel.transaction import Transaction
 
 
-def delete_transaction(user_uuid: uuid.UUID, transaction_id: uuid.UUID, session: Session) -> int:
-    statement = delete(Transaction).where(Transaction.user_id == user_uuid, Transaction.id == transaction_id)
-    result = session.exec(statement)
-    return result.rowcount
+class TransactionRepository(Protocol):
+    def get_user_transactions(self, user_uuid: uuid.UUID) -> List[Transaction] | None: ...
+    def get_user_transaction(self, user_uuid: uuid.UUID, transaction_id: uuid.UUID) -> Transaction | None: ...
+    def insert_transaction(self, transaction: Transaction) -> Transaction: ...
+    def delete_transaction(self, user_uuid: uuid.UUID, transaction_id: uuid.UUID) -> int: ...
+
+@dataclass
+class SQLTransactionRepository:
+    session: Session
+    
+    def get_user_transactions(self, user_uuid: uuid.UUID) -> List[Transaction] | None:
+        transactions = self.session.exec(select(Transaction).where(Transaction.user_id == user_uuid)).all()
+        return list(transactions)  # TODO: if the number of transactions is large, consider pagination
+
+    def get_user_transaction(self, user_uuid: uuid.UUID, transaction_id: uuid.UUID) -> Transaction | None:
+        transaction = self.session.exec(
+            select(Transaction)
+            .where(Transaction.user_id == user_uuid)
+            .where(Transaction.id == transaction_id)
+        ).first()
+        return transaction
+
+    def insert_transaction(self, transaction: Transaction) -> Transaction:
+        self.session.add(transaction)
+        self.session.commit()
+        self.session.refresh(transaction)
+        return transaction
+
+    def delete_transaction(self, user_uuid: uuid.UUID, transaction_id: uuid.UUID) -> int:
+        statement = (
+            delete(Transaction)
+            .where(Transaction.user_id == user_uuid)
+            .where(Transaction.id == transaction_id)
+        )
+        result = self.session.exec(statement)
+        self.session.commit()  # Added missing commit
+        return result.rowcount
     
     
     

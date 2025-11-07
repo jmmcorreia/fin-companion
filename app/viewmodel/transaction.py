@@ -1,8 +1,10 @@
-from sqlmodel import SQLModel
 import uuid
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 from typing import Literal
+
+from sqlmodel import SQLModel
+
 
 class TransactionBase(SQLModel):
     occurred_on: datetime

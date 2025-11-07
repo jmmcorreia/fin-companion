@@ -1,5 +1,6 @@
 import uuid
-from sqlmodel import Field, SQLModel # type: ignore
+
+from sqlmodel import Field, SQLModel  # type: ignore
 
 
 class User(SQLModel, table=True):

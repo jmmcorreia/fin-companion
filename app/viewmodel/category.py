@@ -1,5 +1,6 @@
-from sqlmodel import SQLModel
 import uuid
+
+from sqlmodel import SQLModel
 
 
 class CategoryBase(SQLModel):

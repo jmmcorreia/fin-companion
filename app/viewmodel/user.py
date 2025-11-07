@@ -1,5 +1,7 @@
-from sqlmodel import SQLModel
 import uuid
+
+from sqlmodel import SQLModel
+
 
 # TODO: Use pydantic models for user input and output?
 class UserBase(SQLModel):

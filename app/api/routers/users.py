@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
 from typing import Annotated
 
+from fastapi import APIRouter, Depends
+
+from app.api.deps import get_current_active_user
 from app.viewmodel.user import UserResponse
-from app.services.auth import get_current_active_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -1,26 +1,24 @@
-from fastapi import APIRouter, Depends
 from typing import List
 
+from fastapi import APIRouter, Depends
 
+from app.api.deps import CategoryServiceDep, get_current_active_user
 from app.viewmodel.category import CategoryBase, CategoryResponse
-from app.services.auth import get_current_active_user
-from app.services.category import read_categorries, create_category
-from app.db.session import SessionDep
 
 router = APIRouter(prefix="/categories", tags=["categories"], dependencies=[Depends(get_current_active_user)])
 # TODO: RBAC ?
 
 @router.get("/")
 def get_categories(
-    session: SessionDep
+    category_service: CategoryServiceDep,
 ) -> List[CategoryResponse]:
     
-    return read_categorries(session)
+    return category_service.get_categories()
 
 
 @router.post("/")
 def post_category(
     category: CategoryBase,
-    session: SessionDep
+    category_service: CategoryServiceDep,
 ) -> CategoryResponse:
-    return create_category(category, session) 
+    return category_service.create_category(category) 

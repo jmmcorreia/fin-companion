@@ -1,9 +1,10 @@
 import uuid
-from decimal import Decimal
 from datetime import datetime, timezone
+from decimal import Decimal
 
-from sqlmodel import Field, SQLModel # type: ignore
 from sqlalchemy import Column, DateTime, func
+from sqlmodel import Field, SQLModel  # type: ignore
+
 
 class Transaction(SQLModel, table=True):
     id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
